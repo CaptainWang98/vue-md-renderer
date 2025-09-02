@@ -1,0 +1,48 @@
+{
+  "name": "vue-md-renderer",
+  "version": "0.0.1",
+  "description": "Render specific Markdown block as custom Vue Component",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsc -w"
+  },
+  "keywords": [
+    "vue",
+    "markdown",
+    "stream",
+    "stream-markdown",
+    "markdown to html",
+    "markdown to vue"
+  ],
+  "author": "2432687264@qq.com",
+  "license": "ISC",
+  "packageManager": "pnpm@10.5.1",
+  "devDependencies": {
+    "prettier": "^3.5.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "typescript": "^5.8.3",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.7"
+  },
+  "peerDependencies": {
+    "vue": "^3.2.0"
+  },
+  "dependencies": {
+    "@shikijs/core": "^3.6.0",
+    "@shikijs/langs": "^3.6.0",
+    "@shikijs/themes": "^3.6.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^3.6.0",
+    "shiki-stream": "^0.1.2",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0",
+    "vfile": "^6.0.3"
+  }
+}
