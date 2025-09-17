@@ -1,20 +1,28 @@
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import { defaultCustomMarkdownParser } from "./plugins/remarkComponentCodeBlock";
-import remarkRehype from "remark-rehype";
-import { defineComponent } from "vue";
+import { defineComponent, h, PropType } from "vue";
+import { useMarkdownProcessor } from "./processor";
+import { PluggableList } from "unified";
+import { type Options as RehypeOptions } from "remark-rehype";
 
-defineComponent({
+export default defineComponent({
+  props: {
+    content: { type: String, required: true },
+    preRemarkPlugins: { type: Array as PropType<PluggableList>, required: false, default: () => [] },
+    remarkPlugins: { type: Array as PropType<PluggableList>, required: false, default: () => [] },
+    
+    rehypeOptions: { type: Object as PropType<RehypeOptions>, required: false },
+    rehypePlugins: { type: Array as PropType<PluggableList>, required: false, default: () => [] },
+  },
   setup(props) {
-    const unifiedProcessor = unified()
-      // parse markdown to AST
-      .use(remarkParse)
-      // support GitHub Flavored Markdown (GFM)
-      .use(remarkGfm)
-      // parse specific Markdown syntax to custom AST nodes
-      .use(defaultCustomMarkdownParser)
-      // convert Markdown AST to HTML AST
-      .use(remarkRehype);
+    const { content, preRemarkPlugins, remarkPlugins, rehypePlugins, rehypeOptions } = props;
+    const processor = useMarkdownProcessor({
+      preRemarkPlugins,
+      remarkPlugins,
+      rehypePlugins,
+      rehypeOptions
+    });
+    const mdast = processor.value.parse(content);
+    const hast = processor.value.runSync(mdast);
+    console.log('hast', hast, 'mdast', mdast);
+    return () => h("div");
   },
 });

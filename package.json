@@ -2,10 +2,10 @@
   "name": "vue-md-renderer",
   "version": "0.0.1",
   "description": "Render specific Markdown block as custom Vue Component",
-  "module": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "files": [
-    "dist"
+    "lib"
   ],
   "scripts": {
     "dev": "tsc -w"
@@ -35,6 +35,7 @@
     "@shikijs/core": "^3.6.0",
     "@shikijs/langs": "^3.6.0",
     "@shikijs/themes": "^3.6.0",
+    "@types/mdast": "^4.0.4",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
