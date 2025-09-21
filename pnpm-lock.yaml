@@ -17,12 +17,18 @@ importers:
       '@shikijs/themes':
         specifier: ^3.6.0
         version: 3.12.1
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
+      property-information:
+        specifier: ^7.1.0
+        version: 7.1.0
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1

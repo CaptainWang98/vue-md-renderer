@@ -8,7 +8,8 @@
     "lib"
   ],
   "scripts": {
-    "dev": "tsc -w"
+    "dev": "tsc -w",
+    "play": "cd ./playground && pnpm i && pnpm dev"
   },
   "keywords": [
     "vue",
@@ -35,8 +36,10 @@
     "@shikijs/core": "^3.6.0",
     "@shikijs/langs": "^3.6.0",
     "@shikijs/themes": "^3.6.0",
+    "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "hast-util-to-jsx-runtime": "^2.3.6",
+    "property-information": "^7.1.0",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",

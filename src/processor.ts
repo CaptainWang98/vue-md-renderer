@@ -1,7 +1,7 @@
 import { PluggableList, unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
-import { defaultCustomMarkdownParser } from "./plugins/remarkComponentCodeBlock";
+import { defaultCustomMarkdownParser, useRehypeHandler } from "./plugins/remarkComponentCodeBlock";
 import remarkRehype, { type Options as RehypeOptions } from "remark-rehype";
 import { computed } from "vue";
 
@@ -13,7 +13,7 @@ interface useMarkdownProcessorOptions {
 }
 
 /**
- * @fileoverview Create a unified processor with remark and rehype plugins
+ * Create a unified processor with remark and rehype plugins
  */
 export function useMarkdownProcessor(options: useMarkdownProcessorOptions) {
   return computed(() => {
@@ -33,8 +33,11 @@ function createProcessor(options?: useMarkdownProcessorOptions) {
     .use([remarkGfm, ...(options?.remarkPlugins ?? [])])
     // parse specific Markdown syntax to custom AST nodes
     .use(defaultCustomMarkdownParser)
-    // convert Markdown AST to HTML AST
-    .use(remarkRehype)
+    // convert Markdown AST to HTML AST with custom handlers
+    .use(remarkRehype, {
+      handlers: useRehypeHandler(),
+    })
+    // TODO: purify HTML output
     // apply rehype plugins if any
     .use(options?.rehypePlugins ?? []);
   return unifiedProcessor;
