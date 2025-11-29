@@ -108,7 +108,8 @@ const MarkdownRendererImpl = defineComponent({
       rehypeOptions: rehypeOptions.value,
     })
 
-    const mdast = computed(() => processor.value.parse(content.value))
+    // 使用 markRaw 避免对 AST 树进行深度响应式转换
+    const mdast = computed(() => markRaw(processor.value.parse(content.value)))
     const hast = computed(() => markRaw(processor.value.runSync(mdast.value)))
 
     // 计算 HAST 树中所有节点的数量（递归统计）
