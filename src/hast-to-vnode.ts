@@ -8,7 +8,8 @@ import { useComponentRegistry } from './hooks/useComponents'
 export function render(
   hast: Root,
   attrs: Record<string, unknown>,
-  customAttrs?: MaybeRefOrGetter<CustomAttrs>
+  customAttrs?: MaybeRefOrGetter<CustomAttrs>,
+  maxNodes?: number
 ): VNode {
   // 7、render root
   return h(
@@ -18,7 +19,8 @@ export function render(
       hast.children,
       { listDepth: -1, listOrdered: false, listItemIndex: -1, svg: false },
       hast,
-      toValue(customAttrs) ?? {}
+      toValue(customAttrs) ?? {},
+      maxNodes
     )
   )
 }
@@ -28,13 +30,17 @@ export function renderChildren(
   nodeList: (RootContent | Root)[],
   ctx: Context,
   parent: Element | Root,
-  customAttrs: CustomAttrs
+  customAttrs: CustomAttrs,
+  maxNodes?: number
 ): VNodeArrayChildren {
   const keyCounter: {
     [key: string]: number
   } = {}
 
-  return nodeList.map(node => {
+  // 如果设置了 maxNodes，只渲染前 maxNodes 个节点
+  const nodesToRender = maxNodes !== undefined ? nodeList.slice(0, maxNodes) : nodeList
+
+  return nodesToRender.map(node => {
     switch (node.type) {
       case 'text':
         return node.value
@@ -42,7 +48,7 @@ export function renderChildren(
         // TODO: remove extra `span` wrapper
         return h('span', { innerHTML: node.value, style: { display: 'contents' } })
       case 'root':
-        return renderChildren(node.children, ctx, parent, customAttrs)
+        return renderChildren(node.children, ctx, parent, customAttrs, maxNodes)
       case 'element': {
         const vnodeInfo = getVNodeInfos(node, parent, ctx, keyCounter, customAttrs)
 
@@ -56,12 +62,16 @@ export function renderChildren(
             return renderer({
               ...vnodeProps,
               ...attrs,
-              children: () => renderChildren(node.children, context, node, customAttrs),
+              children: () => renderChildren(node.children, context, node, customAttrs, maxNodes),
             })
           }
         }
 
-        return h(node.tagName, attrs, renderChildren(node.children, context, node, customAttrs))
+        return h(
+          node.tagName,
+          attrs,
+          renderChildren(node.children, context, node, customAttrs, maxNodes)
+        )
       }
       default:
         return null
