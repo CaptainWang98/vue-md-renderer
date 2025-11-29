@@ -1,14 +1,11 @@
-import { computed, defineComponent, h, PropType, provide, toRefs } from 'vue'
+import { computed, defineComponent, h, PropType, toRefs } from 'vue'
 import { useMarkdownProcessor } from './processor'
 import { PluggableList } from 'unified'
 import { type Options as RehypeOptions } from 'remark-rehype'
-import {
-  COMPONENT_REGISTRY_KEY,
-  useComponentRegistry,
-  useDefaultComponents,
-} from './components/useComponents'
+import { useComponentRegistry, useDefaultComponents } from './hooks/useComponents'
 import { render } from './hast-to-vnode'
 import { useShiki } from './hooks/useShiki'
+import { ComponentRenderer } from './components/componentRegistry'
 
 export default defineComponent({
   name: 'MarkdownRenderer',
@@ -25,14 +22,20 @@ export default defineComponent({
   },
   setup(props, { slots, attrs }) {
     const componentsDefault = useDefaultComponents()
-    const componentsRegistry = {
-      ...componentsDefault,
-      // extract named slots as components, only if slot is function
-      ...(Object.fromEntries(
-        Object.entries(slots).filter(([_, v]) => typeof v === 'function')
-      ) as Record<string, () => unknown>),
+    const componentsRegistry = useComponentRegistry()
+    // register default components
+    componentsRegistry.regist(componentsDefault)
+    // register slot components
+    if (slots && Object.keys(slots).length > 0) {
+      const slotComponents: Record<string, ComponentRenderer> = {}
+      for (const [name, slotFn] of Object.entries(slots)) {
+        if (slotFn instanceof Function) {
+          slotComponents[name] = (props: Record<string, unknown>) => slotFn(props)
+        }
+      }
+      componentsRegistry.regist(slotComponents)
     }
-    provide(COMPONENT_REGISTRY_KEY, componentsRegistry)
+
     // init shiki
     useShiki()
 
@@ -67,12 +70,11 @@ const MarkdownRendererImpl = defineComponent({
       rehypeOptions: rehypeOptions.value,
     })
 
-    const componentRegistry = useComponentRegistry()
     const mdast = computed(() => processor.value.parse(content.value))
     const hast = computed(() => processor.value.runSync(mdast.value))
 
     return () => {
-      return render(hast.value, attrs, componentRegistry)
+      return render(hast.value, attrs)
     }
   },
 })

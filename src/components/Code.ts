@@ -1,5 +1,5 @@
 import { defineComponent, h } from 'vue'
-import { useComponentRegistry } from './useComponents'
+import { useComponentRegistry } from '../hooks/useComponents'
 import CodeLine from './CodeLine/index'
 import CodeBlock from './CodeBlock/index.vue'
 // import { useMarkdownContext } from '../MarkdownProvider';

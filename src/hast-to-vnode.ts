@@ -3,11 +3,11 @@ import type { MaybeRefOrGetter, VNode, VNodeArrayChildren } from 'vue'
 import type { AliasList, Attributes, Context, CustomAttrs, CustomAttrsObjectResult } from './types'
 import { find, html, svg } from 'property-information'
 import { h, toValue } from 'vue'
+import { useComponentRegistry } from './hooks/useComponents'
 
 export function render(
   hast: Root,
   attrs: Record<string, unknown>,
-  componentRegistry: Record<string, (raw: any) => ReturnType<typeof h>>,
   customAttrs?: MaybeRefOrGetter<CustomAttrs>
 ): VNode {
   // 7、render root
@@ -18,7 +18,6 @@ export function render(
       hast.children,
       { listDepth: -1, listOrdered: false, listItemIndex: -1, svg: false },
       hast,
-      componentRegistry,
       toValue(customAttrs) ?? {}
     )
   )
@@ -29,7 +28,6 @@ export function renderChildren(
   nodeList: (RootContent | Root)[],
   ctx: Context,
   parent: Element | Root,
-  componentRegistry: Record<string, (raw: any) => ReturnType<typeof h>>,
   customAttrs: CustomAttrs
 ): VNodeArrayChildren {
   const keyCounter: {
@@ -44,30 +42,26 @@ export function renderChildren(
         // TODO: remove extra `span` wrapper
         return h('span', { innerHTML: node.value, style: { display: 'contents' } })
       case 'root':
-        return renderChildren(node.children, ctx, parent, componentRegistry, customAttrs)
+        return renderChildren(node.children, ctx, parent, customAttrs)
       case 'element': {
         const vnodeInfo = getVNodeInfos(node, parent, ctx, keyCounter, customAttrs)
 
         const { attrs, context, aliasList, vnodeProps } = vnodeInfo
         for (let i = aliasList.length - 1; i >= 0; i--) {
           // 10. If there's a suitable component, render it directly
-          const renderer = componentRegistry[aliasList[i]]
+          const componentRegistry = useComponentRegistry()
+          const renderer = componentRegistry.get(aliasList[i])
 
-          if (typeof renderer === 'function') {
+          if (renderer) {
             return renderer({
               ...vnodeProps,
               ...attrs,
-              children: () =>
-                renderChildren(node.children, context, node, componentRegistry, customAttrs),
+              children: () => renderChildren(node.children, context, node, customAttrs),
             })
           }
         }
 
-        return h(
-          node.tagName,
-          attrs,
-          renderChildren(node.children, context, node, componentRegistry, customAttrs)
-        )
+        return h(node.tagName, attrs, renderChildren(node.children, context, node, customAttrs))
       }
       default:
         return null
