@@ -134,18 +134,39 @@ export function useBatchRendering(
   /**
    * 自适应调整批次大小
    * 根据实际渲染时间动态调整批次大小，保持性能最优
+   *
+   * 调整策略说明：
+   * 1. 阈值设计：
+   *    - 超时阈值 1.5x：允许一定的性能波动
+   *    - 快速阈值 0.6x：显著低于预算时才增加，避免过度激进
+   *
+   * 2. 调整系数：
+   *    - 减小系数 0.75（-25%）：温和降低，避免过度收缩（参考 TCP 拥塞控制的乘性减）
+   *    - 增加系数 1.15（+15%）：保守增长，避免突然超时（参考 TCP 的加性增）
+   *    - 采用不对称设计：减小快于增加，优先保证性能稳定性
+   *
+   * 3. 边界控制：
+   *    - 最小值：maxSize / 4（保证至少有一定批次大小）
+   *    - 最大值：maxSize（不超过配置的上限）
    */
   function adjustBatchSize(elapsedMs: number) {
     const budget = config.renderBatchBudgetMs
     const maxSize = config.renderBatchSize
     const minSize = Math.max(1, Math.floor(maxSize / 4))
 
-    if (elapsedMs > budget * 1.2) {
-      // 超出预算 20%，减小批次大小
-      adaptiveBatchSize.value = Math.max(minSize, Math.floor(adaptiveBatchSize.value * 0.7))
-    } else if (elapsedMs < budget * 0.5 && adaptiveBatchSize.value < maxSize) {
-      // 远低于预算，增加批次大小
-      adaptiveBatchSize.value = Math.min(maxSize, Math.ceil(adaptiveBatchSize.value * 1.2))
+    // 性能指标：实际耗时与预算的比值
+    const performanceRatio = elapsedMs / budget
+
+    if (performanceRatio > 1.5) {
+      // 严重超时（超过预算 50%）：减小批次
+      // 使用 0.75 系数：参考 TCP 拥塞控制的 multiplicative decrease
+      const newSize = Math.floor(adaptiveBatchSize.value * 0.75)
+      adaptiveBatchSize.value = Math.max(minSize, newSize)
+    } else if (performanceRatio < 0.6 && adaptiveBatchSize.value < maxSize) {
+      // 性能充裕（低于预算 40%）：增加批次
+      // 使用 1.15 系数：参考 TCP 的 additive increase，保守增长
+      const newSize = Math.ceil(adaptiveBatchSize.value * 1.15)
+      adaptiveBatchSize.value = Math.min(maxSize, newSize)
     }
   }
 
@@ -295,7 +316,7 @@ export function useBatchRendering(
           reset()
           return
         }
-        
+
         if (oldTotal !== undefined && newTotal > oldTotal) {
           // 内容增加（流式场景）- 不重置，继续从当前位置渲染
           if (!isRendering.value && renderedCount.value < newTotal) {
