@@ -192,6 +192,58 @@ export function useBatchRendering(
   }
 
   /**
+   * 使用 requestIdleCallback 调度渲染
+   */
+  function scheduleWithIdleCallback(batchSize: number, total: number) {
+    schedulers.idleCallbackId = requestIdleCallback(
+      async deadline => {
+        schedulers.idleCallbackId = null
+
+        // 在空闲时间内尽可能多地渲染
+        while (
+          renderedCount.value < total &&
+          (deadline.timeRemaining() > config.renderBatchBudgetMs * 0.5 || deadline.didTimeout)
+        ) {
+          await executeBatch(batchSize)
+        }
+
+        // 如果还没渲染完，继续调度
+        if (renderedCount.value < total) {
+          scheduleNextBatch()
+        } else {
+          isRendering.value = false
+        }
+      },
+      { timeout: config.renderBatchIdleTimeoutMs }
+    )
+  }
+
+  /**
+   * 使用 requestAnimationFrame 调度渲染（降级方案）
+   */
+  function scheduleWithRAF(batchSize: number, _total: number) {
+    schedulers.rafId = requestAnimationFrame(() => {
+      schedulers.rafId = null
+
+      if (config.renderBatchDelay > 0) {
+        schedulers.timeoutId = setTimeout(async () => {
+          schedulers.timeoutId = null
+          await executeBatch(batchSize)
+          scheduleNextBatch()
+        }, config.renderBatchDelay) as unknown as number
+      } else {
+        executeBatch(batchSize).then(() => {
+          scheduleNextBatch()
+        })
+      }
+    })
+  }
+
+  // 在初始化时根据浏览器 API 可用性确定调度函数，避免运行时分支判断
+  const scheduleBatch: (batchSize: number, total: number) => void =
+    typeof requestIdleCallback !== 'undefined' ? scheduleWithIdleCallback : scheduleWithRAF
+
+  /**
    * 调度下一批渲染
    */
   function scheduleNextBatch() {
@@ -205,47 +257,8 @@ export function useBatchRendering(
 
     const batchSize = Math.max(1, Math.round(adaptiveBatchSize.value))
 
-    // 优先使用 requestIdleCallback (如果可用)
-    if (typeof requestIdleCallback !== 'undefined') {
-      schedulers.idleCallbackId = requestIdleCallback(
-        async deadline => {
-          schedulers.idleCallbackId = null
-
-          // 在空闲时间内尽可能多地渲染
-          while (
-            renderedCount.value < total &&
-            (deadline.timeRemaining() > config.renderBatchBudgetMs * 0.5 || deadline.didTimeout)
-          ) {
-            await executeBatch(batchSize)
-          }
-
-          // 如果还没渲染完，继续调度
-          if (renderedCount.value < total) {
-            scheduleNextBatch()
-          } else {
-            isRendering.value = false
-          }
-        },
-        { timeout: config.renderBatchIdleTimeoutMs }
-      )
-    } else {
-      // 降级使用 requestAnimationFrame + setTimeout
-      schedulers.rafId = requestAnimationFrame(() => {
-        schedulers.rafId = null
-
-        if (config.renderBatchDelay > 0) {
-          schedulers.timeoutId = setTimeout(async () => {
-            schedulers.timeoutId = null
-            await executeBatch(batchSize)
-            scheduleNextBatch()
-          }, config.renderBatchDelay) as unknown as number
-        } else {
-          executeBatch(batchSize).then(() => {
-            scheduleNextBatch()
-          })
-        }
-      })
-    }
+    // 直接调用预先确定的调度函数
+    scheduleBatch(batchSize, total)
   }
 
   /**
