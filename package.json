@@ -33,7 +33,7 @@
     "markdown to vue"
   ],
   "author": "2432687264@qq.com",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.5.1",
   "devDependencies": {
     "@types/hast": "^3.0.4",
