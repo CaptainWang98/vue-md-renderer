@@ -16,6 +16,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "katex": "^0.16.25",
     "vue": "^3.5.18",
     "vue-md-renderer": "workspace:^0.0.1"
   },

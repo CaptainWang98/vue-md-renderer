@@ -4,7 +4,7 @@ import VueMdRenderer, { AsyncWrapper } from 'vue-md-renderer'
 import MyComp from './components/MyComp'
 import BatchRenderingDemo from './components/BatchRenderingDemo.vue'
 // support latex
-// import "katex/dist/katex.min.css";
+import 'katex/dist/katex.min.css'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 

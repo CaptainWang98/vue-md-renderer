@@ -111,6 +111,9 @@ importers:
 
   playground:
     dependencies:
+      katex:
+        specifier: ^0.16.25
+        version: 0.16.25
       vue:
         specifier: ^3.5.18
         version: 3.5.20(typescript@5.8.2)
