@@ -1,4 +1,3 @@
-import { time } from "console";
 import { defineComponent, h, PropType } from "vue";
 
 export default defineComponent({
