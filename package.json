@@ -2,13 +2,18 @@
   "name": "vue-md-renderer",
   "version": "0.0.1",
   "description": "Render specific Markdown block as custom Vue Component",
-  "module": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./lib/vue-md-renderer.umd.js",
+  "module": "./lib/vue-md-renderer.es.js",
+  "types": "./lib/index.d.ts",
   "files": [
-    "dist"
+    "lib"
   ],
   "scripts": {
-    "dev": "tsc -w"
+    "dev": "vite build -w --sourcemap",
+    "build": "vite build",
+    "lint": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,vue,js,jsx}\"",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "vue",
@@ -22,10 +27,23 @@
   "license": "ISC",
   "packageManager": "pnpm@10.5.1",
   "devDependencies": {
+    "@types/hast": "^3.0.4",
+    "@types/mdast": "^4.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-vue": "^10.6.2",
     "prettier": "^3.5.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "sass": "^1.93.2",
+    "sass-embedded": "^1.93.1",
+    "sass-loader": "^16.0.5",
     "typescript": "^5.8.3",
     "vite": "^6.2.0",
+    "vite-plugin-dts": "^4.5.4",
     "vitest": "^3.0.7"
   },
   "peerDependencies": {
@@ -35,11 +53,13 @@
     "@shikijs/core": "^3.6.0",
     "@shikijs/langs": "^3.6.0",
     "@shikijs/themes": "^3.6.0",
+    "@shikijs/transformers": "^3.13.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
+    "property-information": "^7.1.0",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
-    "shiki": "^3.6.0",
+    "shiki": "^3.12.1",
     "shiki-stream": "^0.1.2",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
