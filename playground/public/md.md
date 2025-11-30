@@ -5,11 +5,9 @@ this is a paragraph contain _x_ and **strong** syntax
 ## Code Block
 
 ```javascript
-  console.log('Hello, world!');
+console.log('Hello, world!')
 
-    console.log('Hello, world!');
-
-const a = 11;
+const a = 11
 
 function arr() {
   return []

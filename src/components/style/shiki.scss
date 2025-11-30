@@ -37,6 +37,9 @@ body {
   --shiki-code-header-bg: #fafafa;
   --shiki-code-header-span-color: #575757;
   --shiki-code-header-btn-bg: #ebedf0;
+  --el-border-color: #dcdfe6;
+  --el-fill-color: #f5f7fa;
+  --el-fill-color-lighter: #fafafa;
 }
 
 body.dark {
@@ -46,6 +49,9 @@ body.dark {
   --shiki-code-header-bg: #272727;
   --shiki-code-header-span-color: #fafafa;
   --shiki-code-header-btn-bg: #3b3b3b;
+  --el-border-color: #4c4d4f;
+  --el-fill-color: #2d2d2d;
+  --el-fill-color-lighter: #414243;
 }
 
 body.dark .shiki,
@@ -119,7 +125,9 @@ body.dark .shiki span {
     }
   }
 
-  pre div.pre-md {
+  // 代码块容器样式 - 支持 pre div.pre-md 和 div.pre-md 两种结构
+  pre div.pre-md,
+  div.pre-md {
     position: relative;
     border-radius: var(--shiki-custom-brr-mini);
     border: 1px solid var(--el-border-color);
@@ -227,7 +235,9 @@ body.dark .shiki span {
     }
   }
 
-  pre div.is-expanded {
+  // 展开状态样式
+  pre div.is-expanded,
+  div.is-expanded {
     height: auto !important;
     code {
       padding: 8px !important;
@@ -235,6 +245,115 @@ body.dark .shiki span {
     }
     .markdown-elxLanguage-header-toggle-expand {
       transform: rotate(0deg) !important;
+    }
+  }
+}
+
+// 全局代码块样式（不依赖容器类）
+div.pre-md {
+  position: relative;
+  border-radius: var(--shiki-custom-brr-mini);
+  border: 1px solid var(--el-border-color);
+  min-width: 180px !important;
+  overflow: hidden;
+
+  .markdown-elxLanguage-header-div {
+    box-sizing: content-box !important;
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    padding: 5px 5px 5px 8px;
+    border-radius: var(--shiki-custom-brr-mini) var(--shiki-custom-brr-mini) 0 0;
+    -webkit-backdrop-filter: blur(var(--shiki-custom-blur));
+    backdrop-filter: blur(var(--shiki-custom-blur));
+    margin: 0;
+    background-color: var(--shiki-code-header-bg);
+    z-index: 1;
+    border-bottom: 1px solid var(--el-border-color);
+
+    span {
+      box-shadow: none !important;
+      background-color: transparent !important;
+    }
+
+    .markdown-elxLanguage-header-span {
+      font-size: 14px;
+      font-family: sans-serif;
+      color: var(--shiki-code-header-span-color) !important;
+      font-weight: bold !important;
+      background-color: transparent !important;
+      -webkit-user-select: none;
+      user-select: none;
+      text-transform: uppercase;
+    }
+
+    .markdown-elxLanguage-header-space-start,
+    .markdown-elxLanguage-header-space {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .markdown-elxLanguage-header-space-start {
+      justify-content: flex-start;
+      flex: 1;
+    }
+
+    .shiki-header-button {
+      border: 1px solid transparent;
+      border-radius: var(--shiki-custom-brr);
+      background-color: transparent;
+      width: fit-content !important;
+      padding: 4px 6px;
+      min-height: 24px;
+      opacity: 1;
+      transition: all 0.3s ease-in-out;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--shiki-code-header-span-color);
+      }
+
+      &:hover {
+        background-color: var(--shiki-code-header-btn-bg);
+      }
+
+      &.copied {
+        svg {
+          stroke: var(--el-color-success, #67c23a);
+        }
+      }
+    }
+  }
+
+  code {
+    flex: 1;
+    box-sizing: border-box;
+    width: 100%;
+    text-shadow: none !important;
+
+    span {
+      font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+  &.is-expanded {
+    height: auto !important;
+
+    code {
+      padding: 8px !important;
+      height: auto !important;
     }
   }
 }
