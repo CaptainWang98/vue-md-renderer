@@ -13,7 +13,8 @@ import type {
   TokensResult,
 } from 'shiki'
 import { createdBundledHighlighter, createOnigurumaEngine, createSingletonShorthands } from 'shiki'
-import { onUnmounted, provide, ref } from 'vue'
+import { onScopeDispose, provide, ref } from 'vue'
+import { createSharedComposable } from './createSharedComposable'
 import { languageLoaders, themeLoaders } from './shiki-loader'
 
 export const GLOBAL_SHIKI_KEY = Symbol('GLOBAL_SHIKI_KEY')
@@ -95,53 +96,33 @@ class ShikiManager {
   }
 }
 
-// 全局状态管理
-let globalShikiInstance: GlobalShiki | undefined
-let globalShikiManager: ShikiManager | undefined
-let referenceCount = 0
+/**
+ * @description 创建 Shiki 实例的内部 composable
+ */
+function createShikiInstance() {
+  const shikiManager = ShikiManager.getInstance()
+  const shikiInstance = shikiManager.getShiki()
+  const shikiRef = ref<GlobalShiki>(shikiInstance)
 
-const shikiIsCreated = ref(false)
-const shikiInstance = ref<GlobalShiki>()
-const shikiManager = ref<ShikiManager>()
+  // 在 scope dispose 时清理
+  onScopeDispose(() => {
+    shikiManager.dispose()
+  })
+
+  // 提供给子组件使用
+  provide(GLOBAL_SHIKI_KEY, shikiRef)
+
+  return shikiInstance
+}
 
 /**
  * @description 在 Vue 中提供 Shiki 实例（支持多组件实例）
+ *
+ * 使用 Shared Composable 模式管理生命周期：
+ * - 多个组件共享同一个 Shiki 实例
+ * - 自动管理订阅者计数和资源清理
+ * - 完全无全局状态，避免引用计数的竞态问题
+ *
+ * @see https://github.com/vuejs/rfcs/blob/master/active-rfcs/0041-reactivity-effect-scope.md
  */
-export function useShiki(): GlobalShiki {
-  // 增加引用计数
-  referenceCount++
-
-  // ✅ 注册 onUnmounted 钩子
-  onUnmounted(() => {
-    referenceCount--
-
-    // 只有当所有组件都卸载时才清理
-    if (referenceCount === 0) {
-      shikiIsCreated.value = false
-      shikiInstance.value = undefined
-      shikiManager.value?.dispose()
-      globalShikiManager?.dispose()
-      globalShikiInstance = undefined
-      globalShikiManager = undefined
-    }
-  })
-
-  // ✅ 仅在首次时初始化
-  if (!globalShikiInstance) {
-    globalShikiManager = ShikiManager.getInstance()
-    globalShikiInstance = globalShikiManager.getShiki()
-
-    shikiManager.value = globalShikiManager
-    shikiInstance.value = globalShikiInstance
-
-    provide(GLOBAL_SHIKI_KEY, shikiInstance)
-    shikiIsCreated.value = true
-  } else {
-    // 为后续组件实例提供相同的实例
-    shikiManager.value = globalShikiManager
-    shikiInstance.value = globalShikiInstance
-    provide(GLOBAL_SHIKI_KEY, shikiInstance)
-  }
-
-  return globalShikiInstance
-}
+export const useShiki = createSharedComposable(createShikiInstance)
