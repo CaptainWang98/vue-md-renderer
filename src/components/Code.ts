@@ -27,8 +27,8 @@ export default defineComponent({
         return h(CodeLine, { raw: props.raw })
       }
       const { language } = props.raw
-      if (componentRegistry && componentRegistry[language]) {
-        const renderer = componentRegistry[language]
+      if (componentRegistry && componentRegistry.has(language)) {
+        const renderer = componentRegistry.get(language)
 
         if (typeof renderer === 'function') {
           return renderer(props)
