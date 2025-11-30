@@ -15,7 +15,7 @@ export default defineComponent({
   setup(props) {
     // TODO: implement code renderer logic
     const componentRegistry = useComponentRegistry()
-    return (): ReturnType<typeof h> | null => {
+    return () => {
       if (props.raw.inline) {
         if (componentRegistry && componentRegistry.has('inline')) {
           const renderer = componentRegistry.get('inline')
