@@ -2,9 +2,18 @@
   "name": "vue-md-renderer",
   "version": "0.0.1",
   "description": "Render specific Markdown block as custom Vue Component",
-  "main": "./lib/vue-md-renderer.umd.js",
-  "module": "./lib/vue-md-renderer.es.js",
+  "type": "module",
+  "main": "./lib/vue-md-renderer.js",
+  "module": "./lib/vue-md-renderer.js",
   "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/vue-md-renderer.js"
+    },
+    "./style.css": "./lib/vue-md-renderer.css",
+    "./lib/vue-md-renderer.css": "./lib/vue-md-renderer.css"
+  },
   "files": [
     "lib"
   ],

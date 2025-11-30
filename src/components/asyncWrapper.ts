@@ -1,4 +1,4 @@
-import { Component, defineComponent, h, PropType } from 'vue'
+import { defineComponent, h, PropType } from 'vue'
 
 // AsyncWrapper component - uses slot to pass in component
 export const AsyncWrapper = defineComponent({
@@ -33,29 +33,3 @@ export const AsyncWrapper = defineComponent({
     }
   },
 })
-
-// 保留工厂函数以向后兼容
-export const createJsonSuspenseWrapper = (
-  props: Record<string, unknown> & { content: string; fallbackMessage?: string },
-  component: Component,
-  fallback?: Component
-) => {
-  return defineComponent({
-    setup() {
-      return () =>
-        h(
-          AsyncWrapper,
-          {
-            raw: props,
-            fallbackMessage: props.fallbackMessage || 'Loading...',
-          },
-          {
-            default: (slotProps: Record<string, unknown>) =>
-              h(component, { ...props, ...slotProps }),
-            fallback: () =>
-              fallback ? h(fallback) : h('div', { style: { color: '#888' } }, 'Loading...'),
-          }
-        )
-    },
-  })
-}
