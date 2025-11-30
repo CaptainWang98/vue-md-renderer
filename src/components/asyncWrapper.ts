@@ -52,7 +52,8 @@ export const createJsonSuspenseWrapper = (
           {
             default: (slotProps: Record<string, unknown>) =>
               h(component, { ...props, ...slotProps }),
-            fallback: () => fallback || h('div', { style: { color: '#888' } }, 'Loading...'),
+            fallback: () =>
+              fallback ? h(fallback) : h('div', { style: { color: '#888' } }, 'Loading...'),
           }
         )
     },
