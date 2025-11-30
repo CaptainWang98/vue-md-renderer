@@ -12,7 +12,7 @@ this is a paragraph contain _x_ and **strong** syntax
 const a = 11;
 
 function arr() {
-  retrun []
+  return []
 }
 ```
 
