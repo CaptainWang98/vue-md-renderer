@@ -65,6 +65,7 @@ async function generateHtml() {
   }
 }
 
+// TODO: watch language change
 watch(
   () => props.raw?.content,
   async content => {
