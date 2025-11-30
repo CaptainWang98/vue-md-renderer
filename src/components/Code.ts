@@ -17,12 +17,14 @@ export default defineComponent({
     const componentRegistry = useComponentRegistry()
     return (): ReturnType<typeof h> | null => {
       if (props.raw.inline) {
-        if (componentRegistry && componentRegistry.inline) {
-          const renderer = componentRegistry.inline
-          if (typeof renderer === 'function') {
+        if (componentRegistry && componentRegistry.has('inline')) {
+          const renderer = componentRegistry.get('inline')
+          if (renderer && typeof renderer === 'function') {
             return renderer(props)
           }
-          return h(renderer, props)
+          if (renderer) {
+            return h(renderer, props)
+          }
         }
         return h(CodeLine, { raw: props.raw })
       }
@@ -30,10 +32,12 @@ export default defineComponent({
       if (componentRegistry && componentRegistry.has(language)) {
         const renderer = componentRegistry.get(language)
 
-        if (typeof renderer === 'function') {
+        if (renderer && typeof renderer === 'function') {
           return renderer(props)
         }
-        return h(renderer, props)
+        if (renderer) {
+          return h(renderer, props)
+        }
       }
 
       return h(CodeBlock, props)
